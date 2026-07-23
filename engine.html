@@ -399,22 +399,26 @@
         }
 
         function checkVictory() {
-            if (envsDelivered === totalEnvelopes && boxesDelivered === totalBoxes) {
-                isLevelTransitioning = true;
-                
-                if (currentLevelIndex + 1 < levels.length) {
-                    const nextPassword = levels[currentLevelIndex + 1].password;
-                    updateStatus(`Level Completed! Next Password: [[${nextPassword}]]`);
-                    
-                    setTimeout(() => {
-                        currentLevelIndex++;
-                        initGame(currentLevelIndex);
-                    }, 2500);
-                } else {
-                    updateStatus("Victory! All depot levels cleared! 🤖🎉");
-                }
-            }
+    if (envsDelivered === totalEnvelopes && boxesDelivered === totalBoxes) {
+        isLevelTransitioning = true; // Letiltja a mozgást a várakozás alatt
+        
+        if (currentLevelIndex + 1 < levels.length) {
+            const nextPassword = levels[currentLevelIndex + 1].password;
+            
+            // Értesítés és jelszó kiírása
+            updateStatus(`LEVEL CLEARED! Next Level Password: [[${nextPassword}]]`);
+            
+            // 4 másodperc (4000 ms) várakozás a következő pálya betöltése előtt
+            setTimeout(() => {
+                currentLevelIndex++;
+                initGame(currentLevelIndex);
+            }, 4000);
+        } else {
+            updateStatus("VICTORY! All depot levels cleared! 🤖🎉");
         }
+    }
+}
+
 
         function isDoorOpen(row, col) {
             let baseChar = mapBlueprint[row][col];
