@@ -1,0 +1,22 @@
+// --- T-700 MAP MAKER ---
+//
+// O : Wall
+// _ : Floor
+// Y : Player (Robot)
+// B : Box
+// E : Envelope
+// S : Switch
+// D : Door (open when switch is ON)
+// U : Door (open when switch is OFF)
+// L : Lorry (for boxes)
+// M : Mailbox (for envelopes)
+//
+// ----------------------------------------
+
+
+[BOX]
+[[BDMP]]
+OOOOOOO
+O_____O
+O_Y_B_L
+OOOOOOO
