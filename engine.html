@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>T-700</title>
+    <title>T-700 - Engine</title>
     <style>
         :root { 
             --tile-size: 46px; 
@@ -35,10 +35,19 @@
         }
 
         h1 { 
-            margin: 5px 0; 
+            margin: 5px 0 2px 0; 
             color: #0284c7; 
             font-size: 1.6rem; 
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #level-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .menu-bar {
@@ -48,7 +57,7 @@
             align-items: center;
         }
 
-        /* TXT Betöltő gomb */
+        /* TXT Betöltő gomb (offline / helyi futtatáshoz) */
         .file-upload-btn {
             background-color: #0284c7;
             color: white;
@@ -58,7 +67,7 @@
             font-weight: bold;
             cursor: pointer;
             border: none;
-            display: none; /* Alapból elrejtve, GitHubról automatikus */
+            display: none;
         }
         .file-upload-btn:hover {
             background-color: #0369a1;
@@ -71,15 +80,16 @@
         #password-input {
             padding: 5px 10px;
             font-family: inherit;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: bold;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
             background-color: white;
             color: #0f172a;
-            width: 120px;
+            width: 110px;
             text-transform: uppercase;
             text-align: center;
+            letter-spacing: 2px;
         }
         
         #ui { 
@@ -207,6 +217,7 @@
 
     <div id="header-container">
         <h1>T-700</h1>
+        <div id="level-title">Level 1: First Steps</div>
         
         <div class="menu-bar">
             <!-- Fájl beolvasó (offline módhoz) -->
@@ -214,8 +225,8 @@
                 Load levels.txt
                 <input type="file" id="file-input" accept=".txt" onchange="loadMapsFromFile(event)">
             </label>
-            <!-- Jelszó mező -->
-            <input type="text" id="password-input" placeholder="PASSWORD" onchange="checkPassword(this.value)">
+            <!-- Jelszó mező (4 karakteres korlátozással) -->
+            <input type="text" id="password-input" placeholder="PASS" maxlength="4" onchange="checkPassword(this.value)">
         </div>
         
         <div id="ui">
@@ -238,16 +249,17 @@
     </div>
 
     <script>
-        // Alapértelmezett beépített struktúra az új formátum szerint
+        // Alapértelmezett beépített pálya tartalék gyanánt
         let levels = [
             {
-                password: "START",
+                name: "First Steps",
+                password: "STRT",
                 layout: [
                     "OOOOOOOOOOO",
                     "OY____E_UDO",
                     "O_B_O_O_D_O",
                     "O___O_S_D_O",
-                    "O_O_OOO__OO",
+                    "O_O_OOOO_OO",
                     "O_B_E_____O",
                     "OOOOOMOLOOO"
                 ]
@@ -281,7 +293,7 @@
             }
         }
 
-        // Új parszer: kezeli a // megjegyzéseket és a [JELSZÓ] blokkokat
+        // Térkép parszer: kezeli a // megjegyzéseket, a [Pálya Neve]-t és a [[JELS]] jelszót
         function parseLevelsText(text) {
             const lines = text.split(/\r?\n/);
             let parsedLevels = [];
@@ -289,23 +301,44 @@
 
             lines.forEach(line => {
                 let trimmed = line.trim();
-                // Kihagyja az üres sorokat és a kommenteket
-                if (trimmed.length === 0 || trimmed.startsWith('//')) return;
+                
+                // Üres sorok és megjegyzések kihagyása
+                if (trimmed.length === 0 || trimmed.startsWith('//')) {
+                    return;
+                }
 
-                if (trimmed.startsWith('[')) {
-                    if (currentLevel) parsedLevels.push(currentLevel);
+                // [Pálya Neve]
+                if (trimmed.startsWith('[') && trimmed.endsWith(']') && !trimmed.startsWith('[[')) {
+                    if (currentLevel && currentLevel.layout.length > 0) {
+                        parsedLevels.push(currentLevel);
+                    }
                     currentLevel = {
-                        password: trimmed.replace('[', '').replace(']', '').toUpperCase(),
+                        name: trimmed.slice(1, -1).trim(),
+                        password: "",
                         layout: []
                     };
-                } else if (currentLevel) {
-                    parsedLevels.push(currentLevel);
-                    currentLevel = null;
-                    parsedLevels[parsedLevels.length - 1].layout.push(trimmed);
-                } else if (parsedLevels.length > 0) {
-                    parsedLevels[parsedLevels.length - 1].layout.push(trimmed);
+                    return;
+                }
+
+                // [[JELSZÓ]] - 4 nagybetűs angol kód
+                if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
+                    if (currentLevel) {
+                        currentLevel.password = trimmed.slice(2, -2).trim().toUpperCase().slice(0, 4);
+                    }
+                    return;
+                }
+
+                // Térkép (MAP) sorai
+                if (currentLevel) {
+                    currentLevel.layout.push(trimmed);
                 }
             });
+
+            // Az utolsó pályát is elmentjük
+            if (currentLevel && currentLevel.layout.length > 0) {
+                parsedLevels.push(currentLevel);
+            }
+
             return parsedLevels;
         }
 
@@ -371,14 +404,14 @@
                 
                 if (currentLevelIndex + 1 < levels.length) {
                     const nextPassword = levels[currentLevelIndex + 1].password;
-                    updateStatus(`Level Completed! Next Password: ${nextPassword}`);
+                    updateStatus(`Level Completed! Next Password: [[${nextPassword}]]`);
                     
                     setTimeout(() => {
                         currentLevelIndex++;
                         initGame(currentLevelIndex);
-                    }, 2500); // Kicsit több időt hagyunk leolvasni a jelszót
+                    }, 2500);
                 } else {
-                    updateStatus("Victory! All levels completed! 🤖🎉");
+                    updateStatus("Victory! All depot levels cleared! 🤖🎉");
                 }
             }
         }
@@ -446,7 +479,7 @@
                     if (boxTarget === 'L') {
                         boxesDelivered++;
                         map[nextR][nextC] = '_';
-                        updateStatus("Box loaded.");
+                        updateStatus("Box loaded into lorry.");
                     } else {
                         map[boxNextR][boxNextC] = 'B';
                         map[nextR][nextC] = '_';
@@ -456,17 +489,17 @@
             else if (target === 'E') {
                 envsInHand++;
                 map[nextR][nextC] = '_';
-                updateStatus("Envelope picked.");
+                updateStatus("Envelope collected.");
             } 
             else if (target === 'S') {
                 switchActive = !switchActive;
-                updateStatus("Doors switched.");
+                updateStatus("Doors toggled.");
             } 
             else if (target === 'M') {
                 if (envsInHand > 0) {
                     envsDelivered += envsInHand;
                     envsInHand = 0;
-                    updateStatus("Envelope posted.");
+                    updateStatus("Envelopes posted.");
                 }
             }
 
@@ -487,13 +520,17 @@
 
         function initGame(levelIndex) {
             currentLevelIndex = levelIndex;
-            mapBlueprint = levels[currentLevelIndex].layout;
+            const currentLvl = levels[currentLevelIndex];
+            
+            mapBlueprint = currentLvl.layout;
             map = mapBlueprint.map(row => row.split(''));
             switchActive = false;
             envsInHand = 0;       
             envsDelivered = 0;    
             boxesDelivered = 0;   
             isLevelTransitioning = false;
+            
+            document.getElementById('level-title').innerText = `Level ${currentLevelIndex + 1}: ${currentLvl.name}`;
             
             for (let r = 0; r < map.length; r++) {
                 for (let c = 0; c < map[r].length; c++) {
@@ -503,7 +540,7 @@
             
             countInitialItems();
             render();
-            updateStatus(`Level ${currentLevelIndex + 1} started. Password: ${levels[currentLevelIndex].password}`);
+            updateStatus(`Level ${currentLevelIndex + 1} ready. Password: [[${currentLvl.password}]]`);
         }
 
         window.addEventListener('keydown', (e) => {
