@@ -11,12 +11,16 @@
 // L : Lorry (for boxes)
 // M : Mailbox (for envelopes)
 //
-// ----------------------------------------
-
-
 [BOX]
-[[BDMP]]
+[[BOKS]]
 OOOOOOO
 O_____O
 O_Y_B_L
+OOOOOOO
+//
+[ENVELOPE]
+[[NVLP]]
+OOOOOOO
+O_Y_E_M
+O_____O
 OOOOOOO
