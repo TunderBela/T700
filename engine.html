@@ -400,17 +400,18 @@
 
         function checkVictory() {
     if (envsDelivered === totalEnvelopes && boxesDelivered === totalBoxes) {
-        isLevelTransitioning = true; // Letiltja a mozgást a várakozás alatt
+        isLevelTransitioning = true; // Mozgás letiltása a várakozás alatt
         
         if (currentLevelIndex + 1 < levels.length) {
-            updateStatus(`LEVEL CLEARED! Loading next level...`);
+            // Sima, letisztult üzenet jelszó nélkül
+            updateStatus("LEVEL CLEARED! Loading next level...");
             
             setTimeout(() => {
                 currentLevelIndex++;
                 initGame(currentLevelIndex);
             }, 4000);
         } else {
-            updateStatus(`VICTORY! All depot levels cleared! 🤖🎉`);
+            updateStatus("VICTORY! All depot levels cleared! 🤖🎉");
         }
     }
 }
@@ -539,7 +540,7 @@
     countInitialItems();
     render();
 
-    // Szépen kiemelt jelszó a pálya indításakor
+    // A sárgával kiemelt jelszó kizárólag a pálya betöltésekor jelenik meg
     const passTag = `<span style="color: #d97706; background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #f59e0b;">${currentLvl.password}</span>`;
     updateStatus(`Level ${currentLevelIndex + 1} ready. Password: ${passTag}`);
 }
