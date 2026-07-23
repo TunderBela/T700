@@ -279,7 +279,7 @@
         let isLevelTransitioning = false;
 
         function updateStatus(msg) {
-            document.getElementById('status-bar').innerText = msg;
+            document.getElementById('status-bar').innerHTML = msg;
         }
 
         function countInitialItems() {
@@ -402,11 +402,12 @@
     if (envsDelivered === totalEnvelopes && boxesDelivered === totalBoxes) {
         isLevelTransitioning = true; // Letiltja a mozgást a várakozás alatt
         
+        const currentPassword = levels[currentLevelIndex].password;
+        
         if (currentLevelIndex + 1 < levels.length) {
-            const nextPassword = levels[currentLevelIndex + 1].password;
-            
-            // Értesítés és jelszó kiírása
-            updateStatus(`LEVEL CLEARED! Next Level Password: [[${nextPassword}]]`);
+            // HTML formázás a státuszsávra: bold + kiemelt szín
+            document.getElementById('status-bar').innerHTML = 
+                `LEVEL CLEARED! Password: <span style="color: #d97706; background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #f59e0b;">${currentPassword}</span>`;
             
             // 4 másodperc (4000 ms) várakozás a következő pálya betöltése előtt
             setTimeout(() => {
@@ -414,12 +415,11 @@
                 initGame(currentLevelIndex);
             }, 4000);
         } else {
-            updateStatus("VICTORY! All depot levels cleared! 🤖🎉");
+            document.getElementById('status-bar').innerHTML = 
+                `VICTORY! All depot levels cleared! Final Password: <span style="color: #d97706; background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #f59e0b;">${currentPassword}</span> 🤖🎉`;
         }
     }
 }
-
-
         function isDoorOpen(row, col) {
             let baseChar = mapBlueprint[row][col];
             return baseChar === 'D' ? switchActive : (baseChar === 'U' ? !switchActive : false);
