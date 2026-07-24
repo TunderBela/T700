@@ -31,3 +31,12 @@ OOOOOOOO
 O_Y__E_O
 O____B_M
 OOOOOLOO
+//
+[BLOCKED]
+[[BLCK]]
+OOOMOOO
+O__Y__O
+O__B__O
+O_____O
+O__E__O
+OOOLOOO
